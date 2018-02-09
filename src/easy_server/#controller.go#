@@ -1,0 +1,7 @@
+package easy_server
+
+type controller struct{
+	waitGroup * sync.WaitGroup
+}
+
+
