@@ -40,7 +40,8 @@ func (t * TcpConnection) SendData(bytes []byte){
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
 	if t.connAlive {
-		t.dataCh <- bytes
+	   Logger.DebugLog("send data ",bytes," to conneciton ",t.conn.RemoteAddr())
+	   t.dataCh <- bytes
 	}
 }
 
@@ -48,6 +49,7 @@ func (t * TcpConnection) Close(){
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
 	if t.connAlive {
+		Logger.DebugLog("close conneciton ",t.conn.RemoteAddr())
 		close(t.closeCh)
                 close(t.dataCh)
 		t.connAlive = false

@@ -8,7 +8,7 @@ const (
 )
 
 type tcpDataFuncPacket struct{
-	ops TcpConnectionOps
+	conn * TcpConnection
 	bytes []byte
 	handlers * TcpDataHandlers
 }

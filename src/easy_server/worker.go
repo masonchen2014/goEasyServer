@@ -1,7 +1,6 @@
 package easy_server
 
 import(
-	"fmt"
 	"sync"
 	"runtime"
 )
@@ -17,8 +16,8 @@ func (w * worker) handleTcpPacket(workerNum int){
 	for{
 		select{
 		case df := <-w.dataFuncChan:
-			fmt.Printf("This is woker %d\n",workerNum)
-			df.handlers.handleNoFirstPacket(df.ops,df.bytes)
+			Logger.DebugLog("This is worker ",workerNum," handles the data ",df.bytes," for connection ",df.conn.conn.RemoteAddr())
+			df.handlers.handleNoFirstPacket(df.conn,df.bytes)
 		}
 	}
 }
