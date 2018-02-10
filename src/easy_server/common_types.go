@@ -20,6 +20,10 @@ type TcpDataHandlers struct{
 }
 
 func NewTcpDataHandlers(s func([]byte) (int,SplitError),hf,ho func(TcpConnectionOps,[]byte) ) * TcpDataHandlers{
+     if hf ==nil || ho ==nil {
+     	panic("The tcp packet handler must not be nil")
+	return nil
+     }
      t := &TcpDataHandlers{s,hf,ho}
      return t
 }

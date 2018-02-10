@@ -22,7 +22,7 @@ func main(){
 	server := easy_server.NewServer(8)
 	server.CreateWorkers()
 	server.PrintServerInfo()
-	handlers := easy_server.NewTcpDataHandlers(nil,JustPrint,CloseTheConnection)
+	handlers := easy_server.NewTcpDataHandlers(nil,nil,CloseTheConnection)
 	server.AddTcpListener(":4003",handlers)
 	server.Stop()
 }
