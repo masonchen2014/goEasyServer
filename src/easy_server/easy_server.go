@@ -15,6 +15,7 @@ type EasyServer struct{
 	waitGroup * sync.WaitGroup
 	num_of_listeners int
 	tcpDataFuncPacketCh chan tcpDataFuncPacket
+	udpDataFuncPacketCh chan udpDataFuncPacket
 }
 
 /*
@@ -23,12 +24,13 @@ create EasyServer object
 func NewServer(num int) *EasyServer {
      s := &EasyServer{
 	tcpDataFuncPacketCh:        make(chan tcpDataFuncPacket),
+	udpDataFuncPacketCh:        make(chan udpDataFuncPacket),
 		waitGroup: &sync.WaitGroup{},
 		num_of_workers: num,
     }
 
     s.r = receiver{s.waitGroup,s.tcpDataFuncPacketCh}
-    s.w = worker{s.waitGroup,s.tcpDataFuncPacketCh}
+    s.w = worker{s.waitGroup,s.tcpDataFuncPacketCh,s.udpDataFuncPacketCh}
   
     return s
 }
@@ -76,6 +78,7 @@ func (server * EasyServer) Stop(){
 func (server *EasyServer) addTcpListener(port string,h * TcpDataHandlers) {
      defer server.waitGroup.Done()
      ln, err := net.Listen("tcp",port)
+     defer ln.Close()
      if err != nil {
         Logger.ErrorLog(err)
 	panic("TCP can't listen on port "+port)
@@ -113,9 +116,48 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 			return
 		case d:= <-t.dataCh:
                      if d!=nil {
-		        Logger.DebugLog("send data ",d," to conneciton ",conn.RemoteAddr())
 			conn.Write(d)
                      }
 		}
 	}
+}
+
+
+func (server *EasyServer) AddUdpListener(port string,h func(UdpPacketOps,[]byte)){
+    // 创建监听
+    pConn, err := net.ListenPacket("udp",port)
+    defer pConn.Close()
+    if err != nil {
+        panic(err)
+        return
+    }
+
+    Logger.SysLog("Add udp listener on port ",port)
+    runtime.LockOSThread()
+    data := make([]byte,65535)
+    for {
+        // 读取数据
+        n, remoteAddr, err := pConn.ReadFrom(data)
+        if err != nil {
+	    Logger.WarnLog(err)
+            continue
+        }
+
+	b := make([]byte,n)
+	copy(b,data)
+	Logger.DebugLog("received ",b," from ",remoteAddr)
+	packetConn := &UdpPacketConn{
+	    addr : remoteAddr,
+	    conn : pConn,
+	}
+	dataFuncPacket :=udpDataFuncPacket{
+            conn : packetConn,
+	    bytes : b,
+	    handler : h,
+	}
+
+	server.udpDataFuncPacketCh <-dataFuncPacket
+	
+    }
+
 }

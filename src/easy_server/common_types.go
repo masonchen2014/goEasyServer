@@ -19,6 +19,7 @@ type TcpDataHandlers struct{
 	handleNoFirstPacket func(TcpConnectionOps,[]byte)
 }
 
+
 func NewTcpDataHandlers(s func([]byte) (int,SplitError),hf,ho func(TcpConnectionOps,[]byte) ) * TcpDataHandlers{
      if hf ==nil || ho ==nil {
      	panic("The tcp packet handler must not be nil")
