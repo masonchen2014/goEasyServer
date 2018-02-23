@@ -122,8 +122,18 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 	}
 }
 
-
+/*
+listen on the specified port using udp protocol
+*/
 func (server *EasyServer) AddUdpListener(port string,h func(UdpPacketOps,[]byte)){
+ 	server.waitGroup.Add(1)
+	server.num_of_listeners++
+	go server.addUdpListener(port,h)
+	Logger.SysLog("Add udp listener on port ",port)
+}
+
+
+func (server *EasyServer) addUdpListener(port string,h func(UdpPacketOps,[]byte)){
     // 创建监听
     pConn, err := net.ListenPacket("udp",port)
     defer pConn.Close()
@@ -132,7 +142,6 @@ func (server *EasyServer) AddUdpListener(port string,h func(UdpPacketOps,[]byte)
         return
     }
 
-    Logger.SysLog("Add udp listener on port ",port)
     runtime.LockOSThread()
     data := make([]byte,65535)
     for {
