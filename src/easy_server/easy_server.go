@@ -84,8 +84,6 @@ func (server *EasyServer) addTcpListener(port string,h * TcpDataHandlers) {
 	panic("TCP can't listen on port "+port)
      }
 
-	//bind this goroutine with a os.Thread
-    runtime.LockOSThread()
     for {
         conn, err := ln.Accept()
         if err != nil {

@@ -2,7 +2,6 @@ package easy_server
 
 import(
 	"sync"
-	"runtime"
 )
 
 type worker struct{
@@ -13,7 +12,6 @@ type worker struct{
 
 func (w * worker) handleTcpPacket(workerNum int){
 	defer w.waitGroup.Done()
-	runtime.LockOSThread()
 	for{
 		select{
 		case df := <-w.dataFuncChan:

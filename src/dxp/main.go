@@ -4,6 +4,7 @@ import(
 	"fmt"
 //	"os"
 	"time"
+	"runtime"
 )
 
 func JustPrint(op easy_server.TcpConnectionOps,bytes []byte){
@@ -21,15 +22,16 @@ func UdpDataHandler(ops easy_server.UdpPacketOps,bytes []byte){
 }
 
 func main(){
-	// runtime.GOMAXPROCS(1)
+	runtime.GOMAXPROCS(20)
 //	file,_ := os.Create("dxp.log")
 //	easy_server.SetEasyLogger(os.Stdout,file,file,file)
-	server := easy_server.NewServer(8)
+	server := easy_server.NewServer(5000)
 	server.CreateWorkers()
-	server.PrintServerInfo()
 	handlers := easy_server.NewTcpDataHandlers(nil,JustPrint,CloseTheConnection)
 	server.AddTcpListener(":4003",handlers)
 
 	server.AddUdpListener(":4003",UdpDataHandler)
+	server.PrintServerInfo()
+
 	server.Stop()
 }
