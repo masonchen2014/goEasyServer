@@ -1,7 +1,8 @@
 package easy_server
 
 import(
-	"net"
+    "net"
+    "sync"
 )
 
 type UdpPacketConn struct{
@@ -16,10 +17,13 @@ func (p * UdpPacketConn) SendData(bytes []byte){
      }
 }
 
-type udpDataFuncPacket struct{
-     conn * UdpPacketConn
-     bytes []byte
-     handler func(UdpPacketOps,[]byte)
+type UdpPacketHandler struct{
+     waitGroup * sync.WaitGroup
+}
+
+func (u * UdpPacketHandler)handleUdpPacket(handler func(UdpPacketOps,[]byte),conn * UdpPacketConn,bytes []byte){
+    defer u.waitGroup.Done()
+    handler(conn,bytes)
 }
 
 type UdpPacketOps interface{

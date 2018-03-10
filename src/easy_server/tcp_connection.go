@@ -20,19 +20,26 @@ type TcpConnection struct{
 	conn net.Conn
 	closeCh chan struct{}
 	dataCh chan []byte
+	tcpDataFuncPacketCh chan tcpDataFuncPacket
 	connAlive bool
+	// w worker
+	// r receiver
 }
 
 /*
 create a new TcpConnection object
 */
-func newTcpConnection(c net.Conn) *TcpConnection{
+func newTcpConnection(c net.Conn,cap int,waitGroup *sync.WaitGroup) *TcpConnection{
 	t := &TcpConnection{
 		closeCh : make(chan struct{}),
 		dataCh : make(chan []byte),
+		tcpDataFuncPacketCh : make(chan tcpDataFuncPacket,cap),
 		connAlive : true,
 		conn : c,
     }
+	// t.w = worker{waitGroup,t.tcpDataFuncPacketCh}
+	// t.r = receiver{waitGroup,t.tcpDataFuncPacketCh}
+
     return t
 }
 
@@ -51,7 +58,8 @@ func (t * TcpConnection) Close(){
 	if t.connAlive {
 		Logger.DebugLog("close conneciton ",t.conn.RemoteAddr())
 		close(t.closeCh)
-                close(t.dataCh)
+        close(t.dataCh)
+		close(t.tcpDataFuncPacketCh)
 		t.connAlive = false
 	}
 }

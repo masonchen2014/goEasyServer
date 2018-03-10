@@ -20,13 +20,14 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 	lastPacketRemainBytes := 0
 	bytesToHandleOffset := 0
 	firstPacket := true
+	remoteAddr :=conn.RemoteAddr()
 
 	for{
 		//here handle the last uncomplete packet
 		if lastPacketRemainBytes > 0 {
 			n,err := conn.Read(bytesToSend[sendBufferOffset:])
 			if err !=nil {
-			        Logger.ErrorLog(err)
+			    Logger.ErrorLog(err)
 				break
 			}
 			lastPacketRemainBytes -= n
@@ -38,7 +39,7 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 					r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
 				}else{
 					firstPacket =false
-					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",tcpConn.conn.RemoteAddr())
+					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",remoteAddr)
 					h.handleFirstPacket(tcpConn,bytesToSend)
 				}
 			}
@@ -59,12 +60,12 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 			if h.splitPacket !=nil {
 				tcpPacketLen,err := h.splitPacket(bytes[bytesToHandleOffset:bufferOffset])
 				if err == LessDataSplitError {
-				        Logger.WarnLog("Data is not enough to analysis its length for conneciton from ",tcpConn.conn.RemoteAddr())
+					Logger.WarnLog("Data is not enough to analysis its length for conneciton from ",remoteAddr)
 					break
 				}
 
 				if err == OtherSplitError {
-				        Logger.WarnLog("Can't ananysis the length ,now handle all the data received from ",tcpConn.conn.RemoteAddr())
+					Logger.WarnLog("Can't ananysis the length ,now handle all the data received from ",remoteAddr)
 					//here handle all the bytes in buffer
 					tcpPacketLen = bufferOffset
 					bytesToHandleOffset = bufferOffset
@@ -96,7 +97,7 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 					}else{
 						firstPacket =false
 						h.handleFirstPacket(tcpConn,bytesToSend)
-						Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",tcpConn.conn.RemoteAddr())
+						Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",remoteAddr)
 					}
 				}
 
@@ -109,7 +110,7 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 				if firstPacket !=true{
 					r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
 				}else{
-					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",tcpConn.conn.RemoteAddr())
+					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",remoteAddr)
 					firstPacket =false
 					h.handleFirstPacket(tcpConn,bytesToSend)
 				}
