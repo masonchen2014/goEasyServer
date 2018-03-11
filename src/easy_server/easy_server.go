@@ -12,8 +12,6 @@ type EasyServer and its functions
 type EasyServer struct{
 	waitGroup * sync.WaitGroup
 	num_of_listeners int
-	//
-	// udpDataFuncPacketCh chan udpDataFuncPacket
 }
 
 /*
@@ -82,10 +80,7 @@ func (server *EasyServer) addTcpListener(port string,h * TcpDataHandlers) {
 func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 	Logger.DebugLog("Accept a connection from ",conn.RemoteAddr())
 	defer server.waitGroup.Done()
-	defer func(){
-		Logger.DebugLog("connection from ",conn.RemoteAddr()," closed")
-		conn.Close()
-	}()
+
 	t := newTcpConnection(conn,h.workerNum*2)
 	Logger.DebugLog("create ",h.workerNum," workers for connection from ",conn.RemoteAddr())
 
@@ -97,18 +92,7 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 	}
 
 	server.waitGroup.Add(1)
-	go r.splitPacket(t,h)
-
-	for{
-		select{
-		case  <-t.closeCh:
-			return
-		case d:= <-t.dataCh:
-			if d!=nil {
-				conn.Write(d)
-			}
-		}
-	}
+    r.splitPacket(t,h)
 }
 
 /*
