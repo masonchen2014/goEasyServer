@@ -90,7 +90,7 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 		go w.handleTcpPacket(i)
 	}
 
-	r := receiver{t.tcpDataFuncPacketCh}
+	r := receiver{}
     r.splitPacket(t,h)
 }
 

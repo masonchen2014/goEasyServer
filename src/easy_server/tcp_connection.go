@@ -35,6 +35,14 @@ func newTcpConnection(c net.Conn,cap int) *TcpConnection{
     return t
 }
 
+func (t * TcpConnection) dispatchJobToWorker(job tcpDataFuncPacket){
+	t.rwMutex.RLock()
+	defer t.rwMutex.RUnlock()
+	if t.connAlive {
+		t.tcpDataFuncPacketCh<-job
+	}
+}
+
 func (t * TcpConnection) SendData(bytes []byte){
 	t.rwMutex.RLock()
 	defer t.rwMutex.RUnlock()
@@ -49,6 +57,7 @@ func (t * TcpConnection) Close(){
 	defer t.rwMutex.Unlock()
 	if t.connAlive {
 		Logger.DebugLog("close conneciton ",t.conn.RemoteAddr())
+		t.conn.Close()
 		close(t.tcpDataFuncPacketCh)
 		t.connAlive = false
 	}

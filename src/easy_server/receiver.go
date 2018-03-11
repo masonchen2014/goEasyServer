@@ -1,7 +1,10 @@
 package easy_server
 
+import(
+	_"time"
+)
+
 type receiver struct{
-	dataFuncChan chan tcpDataFuncPacket
 }
 
 func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
@@ -30,7 +33,8 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 			//here handle the complete packet
 			if lastPacketRemainBytes ==0 {
 				if firstPacket !=true{
-					r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
+					tcpConn.dispatchJobToWorker(tcpDataFuncPacket{tcpConn,bytesToSend,h})
+					// r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
 				}else{
 					firstPacket =false
 					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",remoteAddr)
@@ -47,6 +51,8 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 			Logger.ErrorLog(err)
 			break
 		}
+		//test here
+		// time.Sleep(2*time.Second)
 		bufferOffset +=n
 
 		for bytesToHandleOffset < bufferOffset {
@@ -87,7 +93,8 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 					//here send the complete packet
 					// go HandleTcpPacket(server.tcp_packet_channel,)
 					if firstPacket !=true{
-						r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
+						tcpConn.dispatchJobToWorker(tcpDataFuncPacket{tcpConn,bytesToSend,h})
+						// r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
 					}else{
 						firstPacket =false
 						h.handleFirstPacket(tcpConn,bytesToSend)
@@ -102,7 +109,8 @@ func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
 				bufferOffset = 0
 
 				if firstPacket !=true{
-					r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
+					tcpConn.dispatchJobToWorker(tcpDataFuncPacket{tcpConn,bytesToSend,h})
+					// r.dataFuncChan <- tcpDataFuncPacket{tcpConn,bytesToSend,h}
 				}else{
 					Logger.DebugLog("Here handles the first packet ",bytesToSend," for connection from ",remoteAddr)
 					firstPacket =false
