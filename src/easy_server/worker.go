@@ -15,12 +15,12 @@ func (w * worker) handleTcpPacket(workerNum int){
 	for{
 		select{
 		case df := <-w.dataFuncChan:
-						 if df.handlers != nil{
-							 Logger.DebugLog("This is worker ",workerNum," handles the data ",df.bytes," for connection ",df.conn.conn.RemoteAddr())
-			  	 df.handlers.handleNoFirstPacket(df.conn,df.bytes)
-			 } else{
-				 return
-			 }
+			if df.handlers != nil{
+				Logger.DebugLog("This is worker ",workerNum," handles the data ",df.bytes," for connection ",df.conn.conn.RemoteAddr())
+				df.handlers.handleNoFirstPacket(df.conn,df.bytes)
+			} else{
+				return
+			}
 		}
 	}
 }

@@ -29,7 +29,7 @@ type TcpConnection struct{
 /*
 create a new TcpConnection object
 */
-func newTcpConnection(c net.Conn,cap int,waitGroup *sync.WaitGroup) *TcpConnection{
+func newTcpConnection(c net.Conn,cap int) *TcpConnection{
 	t := &TcpConnection{
 		closeCh : make(chan struct{}),
 		dataCh : make(chan []byte),

@@ -86,7 +86,7 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 		Logger.DebugLog("connection from ",conn.RemoteAddr()," closed")
 		conn.Close()
 	}()
-	t := newTcpConnection(conn,h.workerNum,server.waitGroup)
+	t := newTcpConnection(conn,h.workerNum*2)
 	Logger.DebugLog("create ",h.workerNum," workers for connection from ",conn.RemoteAddr())
 
 	w := worker{server.waitGroup,t.tcpDataFuncPacketCh}
