@@ -1,16 +1,10 @@
 package easy_server
 
-import(
-	"sync"
-)
-
 type receiver struct{
-	waitGroup * sync.WaitGroup
 	dataFuncChan chan tcpDataFuncPacket
 }
 
 func (r * receiver) splitPacket(tcpConn *TcpConnection,h * TcpDataHandlers){
-	defer r.waitGroup.Done()
 	defer tcpConn.Close()
 	conn := tcpConn.conn
 	bytes := make([]byte,512)

@@ -85,13 +85,12 @@ func (server *EasyServer) handleConnection(conn net.Conn,h * TcpDataHandlers){
 	Logger.DebugLog("create ",h.workerNum," workers for connection from ",conn.RemoteAddr())
 
 	w := worker{server.waitGroup,t.tcpDataFuncPacketCh}
-	r := receiver{server.waitGroup,t.tcpDataFuncPacketCh}
 	for i:=0;i<h.workerNum;i++{
 		server.waitGroup.Add(1)
 		go w.handleTcpPacket(i)
 	}
 
-	server.waitGroup.Add(1)
+	r := receiver{t.tcpDataFuncPacketCh}
     r.splitPacket(t,h)
 }
 
